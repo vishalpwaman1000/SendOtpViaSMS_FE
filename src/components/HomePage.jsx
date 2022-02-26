@@ -72,7 +72,12 @@ export default class HomePage extends Component {
         this.setState({ totalRecords: data.data.totalRecords })
         this.setState({ totalPages: data.data.totalPages })
         this.setState({ DataRecord: data.data.readRecord })
-        this.setState({ Information: data.data.getMobileOtpDetails })
+        this.setState({
+          Information:
+            data.data.getMobileOtpDetails !== null
+              ? data.data.getMobileOtpDetails
+              : [],
+        })
       })
       .catch((error) => {
         console.log(error)
@@ -100,11 +105,14 @@ export default class HomePage extends Component {
       .then((data) => {
         console.log(data.data, 'isSuccess:', data.data.isSuccess)
         this.setState({
+          Otp: '',
           OtpFlag: data.data.isSuccess ? true : false,
           defaultFlag: true,
           OpenAlert: true,
-          Operation: 'success',
-          OperationMessage: 'Otp Send Successful',
+          Operation: data.data.isSuccess ? 'success' : 'error',
+          OperationMessage: data.data.isSuccess
+            ? 'Otp Send Successful'
+            : data.data.message,
         })
 
         this.ReadInformationMethod(this.state.PageNumber)
@@ -141,10 +149,16 @@ export default class HomePage extends Component {
         console.log(data.data, 'isSuccess:', data.data.isSuccess)
         this.setState({
           OpenAlert: true,
-          Operation: 'success',
-          OperationMessage: 'Otp Verification Successful',
+          Operation: data.data.isSuccess ? 'success' : 'error',
+          OperationMessage: data.data.isSuccess
+            ? 'Otp Verification Successful'
+            : data.data.message,
         })
-        this.handleNewOperation()
+
+        if (data.data.isSuccess) {
+          this.handleNewOperation()
+        }
+
         this.ReadInformationMethod(this.state.PageNumber)
       })
       .catch((error) => {
@@ -402,7 +416,7 @@ export default class HomePage extends Component {
         </div>
         <Snackbar
           open={state.OpenAlert}
-          autoHideDuration={6000}
+          autoHideDuration={4000}
           onClose={this.handleAlertClose}
         >
           <Alert onClose={this.handleAlertClose} severity={state.Operation}>
